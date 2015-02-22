@@ -1,0 +1,241 @@
+<!--<link href="http://kevinburke.bitbucket.org/markdowncss/markdown.css" rel="stylesheet"></link>-->
+<style>
+h1 {
+        color:#004D40;
+         text-align: justify;
+}
+h2 {
+        color:#006064;
+         text-align: justify;
+}
+h3 {
+        color:#00BFA5;
+        text-align: justify;
+}
+h4{
+        color:#01579B;
+        text-align: justify;
+}
+h5{
+        color:#9c27B0;
+        text-align: justify;
+}
+h6{
+        color:#9E9E9E;
+        text-align: justify;
+}
+div {
+        text-align:justify;
+        text-justify:inter-word;
+}
+hr{
+        border-width:4px;
+        color:#1A237E;
+}
+p{
+    color:#212121;
+}
+br{
+        line-height:100%;
+}
+body{
+    margin: 0 auto;
+    font-family: Georgia, Palatino, serif;
+    color: #444444;
+    line-height: 1;
+    max-width: 860px;
+    padding: 30px;
+    margin-left: 24px;
+}
+code {
+    font-family: Consolas, Monaco, Andale Mono, monospace;
+    line-height: 1.5;
+    font-size: 13px;
+}
+aside {
+    display: block;
+    float: right;
+    width: 390px;
+}
+p, ul, ol {
+    font-size: 16px;
+    line-height: 24px;
+    max-width: 540px;
+    text-align: justify;
+}
+</style>
+
+#Análisis exploratorio del comportamiento de los usuarios de Ecobicis en el DF
+##Luis Manuel Román García
+###LIAC-ITAM
+
+<hr>
+
+####Introducción
+En este documento exploramos brevemente el comportamiento de los usuarios de *ecobci* en el Distrito Federa. El documento se divide en dos partes. La primera  cubre  el proceso de limpieza de y preprocesamiento datos y se lleva a cabo en **R**. La segunda consta de estadística descriptiva y se lleva a cabo en **R** y **Python**.
+
+<hr>
+
+####Preprocesamiento de datos
+
+En esta parte leemos las distintas bases de datos que utilizaremos para el análisis. Nuestro objetivo es obtener exclusivamente aquellas columnas que son de interés y tratar de eliminar cualquier inconsistencia en los datos.
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(igraph)
+library(ggmap)
+library(tm)
+library(stringr)
+```
+```{r echo = FALSE}
+# Escritorio de trabajo
+setwd("/home/lgarcia/LIAC/projects/luis/proy1")
+
+# Variables globales de formato.
+color1 <- "#00BFA5"
+color2 <- "#004D40"
+color3 <- "#006064"
+color4 <- "#01579B"
+color5 <- "#9E9E9E"
+theme <-       theme(panel.background = element_blank(),
+                 axis.text.x = element_text(size = 10,
+                                                         angle = 90,
+                                                         face = "bold",
+                                                         color = color2),
+                 axis.text.y = element_text(size = 10,
+                                                         face = "bold",
+                                                         color = color2),
+                 axis.title = element_blank(),
+                 legend.title = element_text(size = 10,
+                                                         face = "bold",
+                                                         color = color2),
+                legend.text = element_text(size = 7,
+                                                         face = "bold",
+                                                         color = color2),
+                strip.text = element_text(size = 10,
+                                                         face = "bold",
+                                                         color = color2))
+```
+Las bases que leeremos las llamaremos *usuarios*, *estaciones*, *graph*.
+
+```{r}
+estaciones   <- read.csv("/home/lgarcia/LIAC/projects/luis/proy1/data/ecobici_estaciones.csv", stringsAsFactors = FALSE)
+usuarios      <- read.csv("/home/lgarcia/LIAC/projects/luis/proy1/data/ecobici_usuarios.csv", stringsAsFactors = FALSE)
+distancias   <- read.csv("/home/lgarcia/LIAC/projects/luis/proy1/data/ecobici_distancias.csv", stringsAsFactors = FALSE)
+```
+La estructura de las distintas bases se muestra a continuación
+
+```{r}
+str(estaciones)
+str(usuarios)
+str(distancias)
+```
+Primero obtenemos las columnas de interés de la base de estaciones
+
+```{r}
+estaciones <- subset(estaciones, select =
+                                                 c("id",
+                                                    "colonia",
+                                                    "delegacion",
+                                                    "longitud",
+                                                    "latitud",
+                                                    "nombre") )
+estaciones$delegacion <- str_trim(estaciones$delegacion)
+estaciones$delegacion <- tolower(estaciones$delegacion)
+estaciones$delegacion <- str_replace_all(estaciones$delegacion, " ", "_")
+```
+
+Hay registros de delegaciones que en realidad no son delegaciones así como también hay nombres de delegaciones que son idénticos excepto por el número de espacios. Ejemplo  *Benito_Juárez* *Benito_Juárez_*. Corregimos estos errores con el siguiente código.
+
+```{r}
+delegaciones <- c("Álvaro Obregón",
+"Azcapotzalco",
+"Benito Juárez",
+"Coyoacán",
+"Cuajimalpa de Morelos",
+"Cuauhtémoc",
+"Gustavo A. Madero",
+"Iztacalco",
+"Iztapalapa",
+"La Magdalena Contreras",
+"Miguel Hidalgo",
+"Milpa Alta",
+"Tláhuac",
+"Tlalpan",
+"Venustiano Carranza",
+"Xochimilco")
+delegaciones <- tolower(delegaciones)
+delegaciones <- str_replace_all(delegaciones, " ", "_")
+
+names(usuarios) <- tolower(names(usuarios))
+usuarios$delegacion <- str_trim(usuarios$delegacion)
+usuarios$delegacion <- tolower(usuarios$delegacion)
+usuarios$delegacion <- str_replace_all(usuarios$delegacion, " ", "_")
+usuarios <- subset(usuarios, select =
+                                          c("usuario",
+                                             "sexo",
+                                             "colonia",
+                                             "delegacion",
+                                             "estado",
+                                             "medio.de.inscripcion",
+                                             "fecha.de.inscripcion",
+                                             "usos",
+                                             "status"),
+                                          estado == "D.F." &
+                                          delegacion %in% delegaciones)
+```
+De igual forma transformamos la variable de fecha en tipo fecha.
+
+```{r}
+usuarios$fecha.de.inscripcion <- as.Date(usuarios$fecha.de.inscripcion)
+```
+
+<hr>
+
+####Análisis exploratorio de datos
+
+Una vez que las bases están limpias y listas para usarse, podemos hacer un poco de análisis exploratorio de datos para darnos una idea de como se comportan los usuarios.
+
+Una pregunta interesante podría ser si varía el número de usos dependiendo de si el usuario es hombre o mujer.
+
+```{r}
+usu_usu <- ggplot(data = usuarios,
+                                aes(x = usuario,
+                                       y = usos,
+                                       color =sqrt(usos) )) +
+                    geom_point(size = .7, alpha = .8) +
+                    facet_wrap(~sexo) +
+                    theme +
+                    scale_colour_gradient(low = color2, high= color1)
+usu_usu
+```
+Para determinar si existe una componente geográfica (por delegación)
+
+```{r}
+usu_del <- ggplot(data=usuarios,
+                             aes(x = delegacion,y = usos, fill = sexo)) +
+                 geom_bar(stat = "identity",position = "dodge") +
+                 facet_wrap(~status, scales = "free")+
+                 theme +
+                 scale_fill_manual(values = c(color3, color1))
+ usu_del
+```
+Aunque bien hay que considerar que no se cuenta con la población total de cada delegación lo que hace que los resultados no esten ponderados por población y que por ende se pudiera marcar  un mayor patrón de uso en las delegaciones más pobladas.
+
+```{r}
+usu_time <- ggplot(data = usuarios,
+                                 aes(x = fecha.de.inscripcion,
+                                        y = usos,
+                                        color = sexo)) +
+                    geom_point(size = .5, alpha = .5) +
+                    geom_smooth(aes(group=sexo),
+                                             method="loess",
+                                             size=.7,
+                                             se = FALSE) +
+                    facet_wrap(~delegacion, scales = "free") +
+                    theme +
+                    scale_colour_manual(values = c(color3, color1))
+usu_time
+```
+En este gráfico se muestra como, sin importar la delegación (y por ende sin considerar factores poblacionales) el proceso de adopción de las *ecobicis* es paulatino, con un pico y después un descenso.
