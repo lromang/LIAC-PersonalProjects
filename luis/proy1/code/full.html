@@ -503,6 +503,33 @@ usu_usu</pre></div></div>
 <p>Finalmente podemos graficar los puntos donde se encuentran las estaciones de <i>ecobici</i> para darnos una idea de su distribución espacial.</p>
 <div id="map-canvas" style="width:550px;height:450px;"></div>
 <h4>Análisis exploratorio de datos: <b>Python</b></h4>
+<p>Dado que la mayor parte del análisis exploratorio de datos se realizó en <b>R</b> por las ventajas para limpieza y preprocesamiento.  En la sección de <b>Python</b> graficaremos el gráfo que representa a las estaciones de <i>ecobici</i> y las distancias entre estas. Para esto necesitamos las siguientes librerias.</p>
+<div class = boxed>
+    <div style="overflow:auto;">
+        <div class="geshifilter">
+            <pre class="r geshifilter-R" style="font-family:monospace;">
+                <span style="color: #673AB7; font-weight: bold;">import </span><span style="">pandas</span><span style="color: #673AB7; font-weight: bold;"> as </span><span style="">ps</span>
+                <span style="color: #673AB7; font-weight: bold;">import </span><span style="">matplotlib</span><span style="color: #673AB7; font-weight: bold;"> as </span><span style="">mp</span>
+                <span style="color: #673AB7; font-weight: bold;">import </span><span style="">igraph</span><span style="color: #673AB7; font-weight: bold;"> as </span><span style="">ig</span>
+                <span style="color: #673AB7; font-weight: bold;">import </span><span style="">os</span>
+            </pre>
+        </div>
+    </div>
+</div>
+<p>y leemos los datos asociados a las estaciones de <i>ecobici</i> y las distancias entre estas.</p>
+<div class = boxed>
+    <div style="overflow:auto;">
+        <div class="geshifilter">
+            <pre class="r geshifilter-R" style="font-family:monospace;">
+                <span style="color: #673AB7; font-weight: bold;">os.chdir</span><span style="color: #9E9E9E">(</span><span style="color: #CDDC39;">'/home/lgarcia/LIAC/projects/luis/proy1'</span><span style="color: #9E9E9E">)</span>
+                <span style="";>distancias =  </span><span style="color: #673AB7; font-weight: bold;">pd.read_csv</span><span style="color: #9E9E9E;"> (</span><span style="color:#CDDC39;">'./data/ecobici_distancias.csv'</span><span style = "color:#9E9E9E">)</span>
+            </pre>
+        </div>
+    </div>
+</div>
+
+
+
 </body>
 </html>
 
