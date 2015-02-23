@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -490,6 +491,7 @@ usuarios <span style="">&lt;-</span> <span style="color: #003399; font-weight: b
 <div class = boxed>
 <div style="overflow:auto;"><div class="geshifilter"><pre class="r geshifilter-R" style="font-family:monospace;">usuarios<span style="">$</span>fecha.de.inscripcion <span style="">&lt;-</span> <span style="color: #003399; font-weight: bold;">as.Date</span><span style="color: #009900;">&#40;</span>usuarios<span style="">$</span>fecha.de.inscripcion<span style="color: #009900;">&#41;</span></pre></div></div>
 </div>
+<hr>
 <h4>Análisis exploratorio de datos: <b>R</b></h4>
 <p>Una vez que las bases están limpias y listas para usarse, podemos hacer un poco de análisis exploratorio de datos para darnos una idea de como se comportan los usuarios.
 
@@ -515,8 +517,9 @@ usu_usu</pre></div></div>
 <p>En este gráfico se muestra como, sin importar la delegación (y por ende sin considerar factores poblacionales) el proceso de adopción de las <i>ecobicis</i> es paulatino, con un pico y después un descenso.</p>
 <p>Finalmente podemos graficar los puntos donde se encuentran las estaciones de <i>ecobici</i> para darnos una idea de su distribución espacial.</p>
 <div id="map-canvas" style="width:550px;height:450px;"></div>
+<hr>
 <h4>Análisis exploratorio de datos: <b>Python</b></h4>
-<p>Dado que la mayor parte del análisis exploratorio de datos se realizó en <b>R</b> por las ventajas para limpieza y preprocesamiento.  En la sección de <b>Python</b> graficaremos el gráfo que representa a las estaciones de <i>ecobici</i> y las distancias entre estas. Para esto necesitamos las siguientes librerias.</p>
+<p>Dado que la mayor parte del análisis exploratorio de datos se realizó en <b>R</b> por las ventajas para limpieza y preprocesamiento.  En esta sección exploraremos algunas de las ventajas que ofrece python para el análisis descriptivo de datos..</p>
 <div class = boxed>
     <div style="overflow:auto;">
         <div class="geshifilter">
@@ -542,11 +545,12 @@ usu_usu</pre></div></div>
 </div>
 <br>
 <hr>
-<h4>Grafo de <i>ecobicis</i></h4>
-<p>Finalmente podemos graficar las estaciones de <i>ecobici</i> en un formato un poco más dinámico el cuál nos permite interactuar con la gráfica.</p>
+<h4>Grafo de <i>ecobicis</i> <b>D3.js</b></h4>
+<p>Finalmente en esta sección utilizamos una de las librerías más utilizadas de <b>Javascript</b> para visualización de datos: <b>D3.js</b>. Dado que contamos con los datos de estaciones de <i>ecobici</i> y las distancias entre estos, podemos hacer un gráfico donde se muestren en forma de gráfo las distintas estaciones como nodos y las distancias entre estas como arístas.</p>
 <br>
 <script type="text/javascript" charset="utf-8">
-      var w = 960, h = 500;
+
+      var w = 960, h = 650;
 
       var labelDistance = 0;
 
@@ -557,9 +561,9 @@ usu_usu</pre></div></div>
       var labelAnchorLinks = [];
       var links = [];
 
-      for(var i = 0; i < 30; i++) {
+      for(var i = 0; i < 67; i++) {
         var node = {
-          label : "node " + i
+          label : "estación " + i
         };
         nodes.push(node);
         labelAnchors.push({
@@ -572,7 +576,7 @@ usu_usu</pre></div></div>
 
       for(var i = 0; i < nodes.length; i++) {
         for(var j = 0; j < i; j++) {
-          if(Math.random() > .95)
+          if(Math.random() > .85)
             links.push({
               source : i,
               target : j,
@@ -599,7 +603,7 @@ usu_usu</pre></div></div>
       var link = vis.selectAll("line.link").data(links).enter().append("svg:line").attr("class", "link").style("stroke", "#CCC");
 
       var node = vis.selectAll("g.node").data(force.nodes()).enter().append("svg:g").attr("class", "node");
-      node.append("svg:circle").attr("r", 5).style("fill", "#555").style("stroke", "#FFF").style("stroke-width", 3);
+      node.append("svg:circle").attr("r", 5).style("fill", "#00BFA5").style("stroke", "#004D40").style("stroke-width", 3);
       node.call(force.drag);
 
 
